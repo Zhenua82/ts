@@ -10,5 +10,3 @@ const elem2 = react_1.default.createElement("div", null,
 const elem3 = react_1.default.createElement("div", { tabIndex: 0 },
     react_1.default.createElement("span", null, 1 + 2));
 const elem4 = react_1.default.createElement('div', { tabIndex: 0 }, 1 + 2);
-// const body = document.querySelector('body');
-// body.append(elem);
