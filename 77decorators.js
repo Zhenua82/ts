@@ -5,6 +5,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 class UserService {
     constructor() {
         this.users = 1000;
@@ -217,3 +220,92 @@ catch (e) {
     console.error('Обработка внешнего блока:', e);
 }
 // console.log(new UserServiceZadachaCatch().getUsers());
+//Декоратор свойства:
+class UserServiceMax {
+    constructor() {
+        this.users = 1000;
+    }
+    getUsers() {
+        return this.users;
+    }
+}
+__decorate([
+    Max(100)
+], UserServiceMax.prototype, "users", void 0);
+function Max(maxValue) {
+    return function (target, propertyKey) {
+        // Создаем приватное поле для хранения значения
+        const privateProp = `__${propertyKey}`; //создаем поле "__users" - вспомогательное приватное поле с другим именем чтобы не было рекурсии
+        Object.defineProperty(target, propertyKey, {
+            get: function () {
+                return this[privateProp];
+            },
+            set: function (value) {
+                if (value > maxValue) {
+                    console.warn(`Значение свойства ${propertyKey} не может быть больше ${maxValue}, а Вы ввели ${value}. Устанавливается ${maxValue}.`);
+                    this[privateProp] = maxValue;
+                }
+                else {
+                    this[privateProp] = value;
+                }
+            },
+            enumerable: true,
+            configurable: true,
+        });
+    };
+}
+const service = new UserServiceMax();
+console.log(service.getUsers()); // 100
+service.users = 50;
+console.log(service.getUsers()); // 50
+service.users = 150;
+console.log(service.getUsers()); // 100, с предупреждением в консоли
+console.log(service);
+//Декоратор параметра:
+// class UserServiceParam implements IUserService{
+class UserServiceParam {
+    constructor() {
+        this.users = 1000;
+    }
+    getUsers(num, str) {
+        console.log(str);
+        return this.users + num;
+    }
+}
+__decorate([
+    __param(1, DecorParam())
+], UserServiceParam.prototype, "getUsers", null);
+function DecorParam() {
+    return function (target, propertyKey, idParam) {
+        console.log(target);
+        console.log(propertyKey);
+        console.log(idParam);
+    };
+}
+const objParam = new UserServiceParam();
+objParam.getUsers(5, 'ggg');
+// Порядок выполнения декораторов:
+let UserServicePorjadok = class UserServicePorjadok {
+    constructor() {
+        this.users = 1000;
+    }
+    getUsers(num) {
+        return this.users + num;
+    }
+};
+__decorate([
+    PorjadokDecor('Свойства')
+], UserServicePorjadok.prototype, "users", void 0);
+__decorate([
+    PorjadokDecor('Метода'),
+    __param(0, PorjadokDecor('Параметра'))
+], UserServicePorjadok.prototype, "getUsers", null);
+UserServicePorjadok = __decorate([
+    PorjadokDecor('Класса')
+], UserServicePorjadok);
+function PorjadokDecor(name) {
+    console.log(`Инициализация декоратора: ${name}`);
+    return function (target, propertyKey, descriptorOrIndex) {
+        console.log(`Завершение работы декоратора ${name}`);
+    };
+}

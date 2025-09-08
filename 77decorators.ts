@@ -200,3 +200,77 @@ try {
   console.error('Обработка внешнего блока:', e);
 }
 // console.log(new UserServiceZadachaCatch().getUsers());
+
+//Декоратор свойства:
+class UserServiceMax implements IUserService{
+    @Max(100)
+    users: number = 1000;
+    getUsers(): number{
+        return this.users
+    }
+}
+
+function Max(maxValue: number) {
+    return function (target: any, propertyKey: string) {
+        // Создаем приватное поле для хранения значения
+        const privateProp = `__${propertyKey}`;//создаем поле "__users" - вспомогательное приватное поле с другим именем чтобы не было рекурсии
+        Object.defineProperty(target, propertyKey, {
+            get: function () {
+                return this[privateProp];
+            },
+            set: function (value: number) {
+                if (value > maxValue) {
+                    console.warn(`Значение свойства ${propertyKey} не может быть больше ${maxValue}, а Вы ввели ${value}. Устанавливается ${maxValue}.`);
+                    this[privateProp] = maxValue;
+                } else {
+                    this[privateProp] = value;
+                }
+            },
+            enumerable: true,
+            configurable: true,
+        });
+    };
+}
+const service = new UserServiceMax();
+console.log(service.getUsers()); // 100
+service.users = 50;
+console.log(service.getUsers()); // 50
+service.users = 150;
+console.log(service.getUsers()); // 100, с предупреждением в консоли
+console.log(service)
+
+//Декоратор параметра:
+// class UserServiceParam implements IUserService{
+class UserServiceParam {
+    users: number = 1000;
+    getUsers(num: number, @DecorParam() str: string): number{
+        console.log(str)
+        return this.users + num
+    }
+}
+function DecorParam(){
+    return function (target: any, propertyKey: string, idParam: number) {
+        console.log(target);
+        console.log(propertyKey);
+        console.log(idParam);
+    }
+}
+const objParam = new UserServiceParam();
+objParam.getUsers(5, 'ggg')
+
+// Порядок выполнения декораторов:
+@PorjadokDecor('Класса')
+class UserServicePorjadok {
+    @PorjadokDecor('Свойства')
+    users: number = 1000;
+    @PorjadokDecor('Метода')
+    getUsers(@PorjadokDecor('Параметра')num: number): number{
+        return this.users + num
+    }
+}
+function PorjadokDecor(name: string) {
+    console.log(`Инициализация декоратора: ${name}`);
+    return function(target: any, propertyKey?: string | symbol, descriptorOrIndex?: PropertyDescriptor | number) {
+        console.log(`Завершение работы декоратора ${name}`);
+    }
+}
