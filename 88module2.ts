@@ -1,0 +1,12 @@
+// import {A} from './88module1.js';
+import {A, g} from './88module1.js';
+import {summ} from './88module1.js';
+import defaultt from './88module1.js'
+import * as all from './88module1.js'
+import './88module3.js'
+
+console.log(A.a)
+console.log(summ(7, 6))
+console.log(g)
+console.log(defaultt)
+console.log(all.A, all.A.a, all.g, all.summ(7, 6), all.default, all)
